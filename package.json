@@ -2,18 +2,21 @@
   "name": "sails-hook-oauth",
   "version": "0.0.0",
   "description": "Implementation of api key oauth authentication",
-  "main": "index.js",
+  "main": "dist/api/hooks/oauth/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "ianbuena",
   "license": "MIT",
   "sails": {
-    "isHook": true
+    "isHook": true,
+    "hookName": "oauth"
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
     "connect-ensure-login": "^0.1.1",
+    "lodash": "^4.17.4",
+    "marlinspike": "^1.0.0",
     "middleware-flow": "^0.8.0",
     "moment": "^2.20.1",
     "oauth2orize": "^1.11.0",
@@ -23,5 +26,15 @@
     "passport-local": "^1.0.0",
     "passport-oauth2-client-password": "^0.1.2",
     "sails-util-mvcsloader": "^0.4.0"
+  },
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-core": "^6.26.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-latest": "^6.24.1",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.0",
+    "sails": "^0.12.14"
   }
 }
