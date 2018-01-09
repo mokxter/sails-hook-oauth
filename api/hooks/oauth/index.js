@@ -9,9 +9,9 @@ if (!oauthHook) {
       super(sails, module);
     }
 
-    configure() {
-      sails.services.passport.loadStrategies();
-    }
+    // configure() {
+    //   sails.services.passport.loadStrategies();
+    // }
   }
 
   oauthHook = Marlinspike.createSailsHook(Oauth);

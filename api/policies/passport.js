@@ -29,8 +29,6 @@ var _ = require('lodash');
 var methods = ['login', 'logIn', 'logout', 'logOut', 'isAuthenticated', 'isUnauthenticated'];
 
 module.exports = function (req, res, next) {
-  console.log("Hell yeah!");  
-
   // Initialize Passport
   passport.initialize()(req, res, function () {
     // Use the built-in sessions
@@ -45,8 +43,7 @@ module.exports = function (req, res, next) {
 
       // Make the user available throughout the frontend (for views)
       res.locals.user = req.user;
-
-      next();
+      return next();
     });
   });
 };
