@@ -1,86 +1,48 @@
+// var Oauth = require('/lib/oauth.js');
+var Passport = require('passport').constructor;
+
 module.exports = function (sails) {
   return {
-    __configKey__: {
-      oauth: {
-        tokeLife: 3600
-      },
-    },
-
     initialize: function (cb) {
-      return cb();
+      sails.config.oauth = { tokenLife: 3600 };
+
+      sails.after('hook:orm:loaded', function () {
+        // Get reference of the user model.
+        var UserModel = sails.models['user'];
+
+        // Create instance of passport and bind it to sails.
+        sails.passport = new Passport();
+        // Teach our Passport how to serialize/dehydrate a user object into an id
+        sails.passport.serializeUser(function(user, done) {
+          console.log('Using primary key', UserModel.primaryKey, 'with record:',user);
+          done(null, user[UserModel.primaryKey]);
+        });
+
+        // Teach our Passport how to deserialize/hydrate an id back into a user object
+        sails.passport.deserializeUser(function(id, done) {
+          UserModel.findOne(id, function(err, user) {
+            done(err, user);
+          });
+        });
+        return cb();
+      });
+
     },
 
     configure: function () {
-      sails.config.http = {
-        middleware: {
-          passportInit: require('passport').initialize(),
-          passportSession: require('passport').session(),
-          fooBar: (function (req, res, next) {
-            return function (req, res, next) {
-              console.log('Received HTTP request: ' + req.method + ' ' + req.path);
-              return next();
-            };
-          })(),
-
-          order: [
-            'cookieParser',
-            'session',
-            'passportInit',
-            'passportSession',
-            'fooBar',
-            'bodyParser',
-            'compress',
-            'poweredBy',
-            'router',
-            'www',
-            'favicon',
-          ],
-        }
-      }
     },
 
     routes: {
       before: {
-        // 'get /oauth/clients': function (req, res, next) {
-        //   // { policy: 'sessionAuth' },
-        //   // { action: 'client/findall' }
-        //   return next();
-        // },
-
-        // 'get /oauth/clients/:id': function (req, res, next) {
-        //   // { action: 'client/find' }
-        //   return next();
-        // },
-
-        // 'post /oauth/clients': function (req, res, next) {
-        //   // { policy: 'basicAuthenticate' },
-        //   // { action: 'client/create' }
-        //   return next();
-        // },
-
-        // 'get /oauth/authorize': function (req, res, next) {
-        //   // { policy: 'ensureLoggedIn' },
-        //   // { policy: 'oauthAuthorize' },
-        //   // { policy: 'oauthTrustClient' },
-        //   // { policy: 'oauthDecision' },
-        //   // { policy: 'oauthErrorHandler' },
-        //   return next();
-        // },
-
-        // 'post /oauth/authorize/decision': function (req, res, next) {
-        //   // { policy: 'ensureLoggedIn' },
-        //   // { policy: 'oauthDecision' }
-        //   return next();
-        // },
-
-        // 'post /oauth/token': function (req, res, next) {
-        //   // { policy: 'isTrustedClient' },
-        //   // { policy: 'passportBasicAuthenticate' },
-        //   // { policy: 'oauthToken' },
-        //   // { policy: 'oauthErrorHandler' },
-
-        //   return res.json({hello: 'world'});
-        // },
+        '/*': function configurePassport(req, res, next) {
+          sails.passport.initialize()(req, res, function(err) {
+            if (err) return res.negotiate(err);
+            sails.passport.session()(req, res, function(err) {
+              if (err) return res.negotiate(err);
+              next();
+            });
+          });
+        }
       }
     }
   }
